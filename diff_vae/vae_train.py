@@ -93,5 +93,6 @@ for epoch in xrange(args.load_epoch + 1, args.epoch):
 
     print "learning rate: %.6f" % scheduler.get_lr()[0]
     if args.save_dir is not None:
-        torch.save(model.state_dict(), args.save_dir + "/model.iter-" + str(epoch))
+        torch.save(model, args.save_dir + "/model.iter-" + str(epoch)) #added
+        #torch.save(model.state_dict(), args.save_dir + "/model.iter-" + str(epoch))
 

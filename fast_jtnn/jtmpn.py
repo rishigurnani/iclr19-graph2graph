@@ -76,6 +76,8 @@ class JTMPN(nn.Module):
         scope = []
 
         for smiles,all_nodes,ctr_node in cand_batch:
+            #actual_smiles = smiles.smiles #added
+            #mol = Chem.MolFromSmiles(actual_smiles) #added
             mol = Chem.MolFromSmiles(smiles)
             Chem.Kekulize(mol) #The original jtnn version kekulizes. Need to revisit why it is necessary
             n_atoms = mol.GetNumAtoms()

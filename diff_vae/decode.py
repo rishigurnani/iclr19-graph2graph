@@ -37,13 +37,24 @@ args = parser.parse_args()
 vocab = [x.strip("\r\n ") for x in open(args.vocab)] 
 vocab = Vocab(vocab)
 
-model = DiffVAE(vocab, args).cuda()
-model.load_state_dict(torch.load(args.model))
+#model = DiffVAE(vocab, args).cuda()
+#model.load_state_dict(torch.load(args.model))
+model = torch.load(args.model) #added
+model.eval() #added
 
 with open(args.test) as f:
     data = [line.split()[0] for line in f]
 
-data = [MolTree(s) for s in data]
+#data = [MolTree(s) for s in data]
+
+data_new = [] #added
+for s in data: #added
+    try:  #added
+        data_new.append(MolTree(s)) #added
+    except: #added
+        pass #added
+data = data_new #added
+
 batches = [data[i : i + 1] for i in xrange(0, len(data))]
 dataset = MolTreeDataset(batches, vocab, assm=False)
 loader = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=0, collate_fn=lambda x:x[0])

@@ -48,7 +48,8 @@ if __name__ == "__main__":
             data = [line.strip("\r\n ").split()[:2] for line in f]
 
         all_data = pool.map(tensorize_pair, data)
-        num_splits = len(data) / 10000
+        #num_splits = len(data) / 10000
+        num_splits = len(data) / 2000 #added
 
         le = (len(all_data) + num_splits - 1) / num_splits
 

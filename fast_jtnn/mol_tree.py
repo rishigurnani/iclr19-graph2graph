@@ -12,7 +12,8 @@ class Vocab(object):
     def __init__(self, smiles_list):
         self.vocab = smiles_list
         self.vmap = {x:i for i,x in enumerate(self.vocab)}
-        self.slots = [get_slots(smiles) for smiles in self.vocab]
+        #self.slots = [get_slots(smiles) for smiles in self.vocab]
+        self.slots = [get_slots(smiles) for smiles in self.vocab if Chem.MolFromSmiles(smiles) is not None] #added
         
     def get_index(self, smiles):
         return self.vmap[smiles]
@@ -130,9 +131,12 @@ if __name__ == "__main__":
     cset = set()
     for line in sys.stdin:
         smiles = line.split()[0]
-        mol = MolTree(smiles)
-        for c in mol.nodes:
-            cset.add(c.smiles)
+        try: #added
+            mol = MolTree(smiles)
+            for c in mol.nodes:
+                cset.add(c.smiles)
+        except: #added
+            pass #added
     for x in cset:
         print x
 
