@@ -34,8 +34,8 @@ def diversity(pairs, num_decode):
     return np.mean(diversity_values)
 
 if __name__ == "__main__":
-    pairs = [('COc1ccc(Cl)cc1C[C@@]1([NH3+])CCCCC1(C)CCOc1ccc(Cl)cc1C[C@@]1([NH3+])CCCCC1(C)CCOc1ccc(Cl)cc1C[C@@]1([NH3+])CCCCC1(C)C', 'Cc1csc(CNC(=O)c2ccc(Cl)c(N3CCCC3=O)c2)n1Cc1csc(CNC(=O)c2ccc(Cl)c(N3CCCC3=O)c2)n1Cc1csc(CNC(=O)c2ccc(Cl)c(N3CCCC3=O)c2)n1'),
-    ('COc1ccc(Cl)cc1C[C@@]1([NH3+])CCCCC1(C)CCOc1ccc(Cl)cc1C[C@@]1([NH3+])CCCCC1(C)CCOc1ccc(Cl)cc1C[C@@]1([NH3+])CCCCC1(C)C', 'Cc1cc(NC2CCCC2)nc([C@@H]2CCCN2S(C)(=O)=O)n1Cc1cc(NC2CCCC2)nc([C@@H]2CCCN2S(C)(=O)=O)n1Cc1cc(NC2CCCC2)nc([C@@H]2CCCN2S(C)(=O)=O)n1'),
-    ('COc1ccc(Cl)cc1C[C@@]1([NH3+])CCCCC1(C)CCOc1ccc(Cl)cc1C[C@@]1([NH3+])CCCCC1(C)CCOc1ccc(Cl)cc1C[C@@]1([NH3+])CCCCC1(C)C', 'CC1(C)CCCC[C@H]1NC(=O)c1scnc1C1CC1CC1(C)CCCC[C@H]1NC(=O)c1scnc1C1CC1CC1(C)CCCC[C@H]1NC(=O)c1scnc1C1CC1')]
+    pairs = [('CC(C)(C)[C@H]1CCc2c(sc(NC(=O)COc3ccc(Cl)cc3)c2C(N)=O)C1CC(C)(C)[C@H]1CCc2c(sc(NC(=O)COc3ccc(Cl)cc3)c2C(N)=O)C1CC(C)(C)[C@H]1CCc2c(sc(NC(=O)COc3ccc(Cl)cc3)c2C(N)=O)C1', 'C[C@@H]1CCc2c(sc(NC(=O)c3ccco3)c2C(N)=O)C1C[C@@H]1CCc2c(sc(NC(=O)c3ccco3)c2C(N)=O)C1C[C@@H]1CCc2c(sc(NC(=O)c3ccco3)c2C(N)=O)C1'),
+    ('CC(C)(C)[C@H]1CCc2c(sc(NC(=O)COc3ccc(Cl)cc3)c2C(N)=O)C1CC(C)(C)[C@H]1CCc2c(sc(NC(=O)COc3ccc(Cl)cc3)c2C(N)=O)C1CC(C)(C)[C@H]1CCc2c(sc(NC(=O)COc3ccc(Cl)cc3)c2C(N)=O)C1', 'C[C@@H]1CCN(C(=O)CCCc2ccccc2)C[C@@H]1OC[C@@H]1CCN(C(=O)CCCc2ccccc2)C[C@@H]1OC[C@@H]1CCN(C(=O)CCCc2ccccc2)C[C@@H]1O'),
+    ('CC(C)(C)[C@H]1CCc2c(sc(NC(=O)COc3ccc(Cl)cc3)c2C(N)=O)C1CC(C)(C)[C@H]1CCc2c(sc(NC(=O)COc3ccc(Cl)cc3)c2C(N)=O)C1CC(C)(C)[C@H]1CCc2c(sc(NC(=O)COc3ccc(Cl)cc3)c2C(N)=O)C1', 'O=C(NCc1cc(F)cc(F)c1)c1cccnc1O=C(NCc1cc(F)cc(F)c1)c1cccnc1O=C(NCc1cc(F)cc(F)c1)c1cccnc1')]
     num_decode = 3
     print diversity(pairs ,num_decode)
