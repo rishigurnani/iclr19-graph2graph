@@ -27,7 +27,7 @@ def diversity(pairs):
         if source in decoded:
             decoded[source].append(translated)
         else:
-            decoded[curr_source] = [translated]
+            decoded[source] = [translated]
     print(decoded)
     # Iterate over source molecules in dictionary and determine individual diversity scores
     for source in decoded:
@@ -41,7 +41,7 @@ def diversity(pairs):
             div /= total
         diversity_values.append(div)
     sources = list(sources)
-    print 'Number of test polymers: ' + str(len(sources))
+    print 'Number of source polymers: ' + str(len(sources))
     return np.mean(diversity_values)
 
 if __name__ == "__main__":
