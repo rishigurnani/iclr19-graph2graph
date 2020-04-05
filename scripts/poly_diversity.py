@@ -20,9 +20,9 @@ def diversity(pairs):
     sources = set()
     decoded = {}
     # Build decoded dictionary that maps source polymers to the list of translated polymers
-    for i in xrange(pairs):
-        source = pairs[i][0]
-        translated = pairs[i][1]
+    for pair in pairs:
+        source = pair[0]
+        translated = pair[1]
         sources.add(source)
         if source in decoded:
             decoded[source].append(translated)
