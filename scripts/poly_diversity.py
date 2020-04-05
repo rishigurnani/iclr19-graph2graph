@@ -28,7 +28,7 @@ def diversity(pairs):
             decoded[source].append(translated)
         else:
             decoded[source] = [translated]
-    print(decoded)
+
     # Iterate over source molecules in dictionary and determine individual diversity scores
     for source in decoded:
         div = 0.0
@@ -49,4 +49,4 @@ if __name__ == "__main__":
     ('CC(C)(C)[C@H]1CCc2c(sc(NC(=O)COc3ccc(Cl)cc3)c2C(N)=O)C1CC(C)(C)[C@H]1CCc2c(sc(NC(=O)COc3ccc(Cl)cc3)c2C(N)=O)C1CC(C)(C)[C@H]1CCc2c(sc(NC(=O)COc3ccc(Cl)cc3)c2C(N)=O)C1', 'C[C@@H]1CCN(C(=O)CCCc2ccccc2)C[C@@H]1OC[C@@H]1CCN(C(=O)CCCc2ccccc2)C[C@@H]1OC[C@@H]1CCN(C(=O)CCCc2ccccc2)C[C@@H]1O'),
     ('CC(C)(C)[C@H]1CCc2c(sc(NC(=O)COc3ccc(Cl)cc3)c2C(N)=O)C1CC(C)(C)[C@H]1CCc2c(sc(NC(=O)COc3ccc(Cl)cc3)c2C(N)=O)C1CC(C)(C)[C@H]1CCc2c(sc(NC(=O)COc3ccc(Cl)cc3)c2C(N)=O)C1', 'O=C(NCc1cc(F)cc(F)c1)c1cccnc1O=C(NCc1cc(F)cc(F)c1)c1cccnc1O=C(NCc1cc(F)cc(F)c1)c1cccnc1'),
     ('COc1cc(Cl)ccc1C(=O)OC[C@H]1CCCCO1', 'C[C@H](Oc1cc(Cl)ccc1Cl)C(=O)NC[C@@H]1CCCO1')]
-    print diversity(pairs)
+    print 'Average diversity: ' + str(diversity(pairs))
