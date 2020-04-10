@@ -9,9 +9,9 @@ import sys
 import argparse
 from props import *
 
-fp_all = pd.read_csv('~/CS6250_project/raw_data/fp_all_data.csv')
-source = fp_all.loc[fp_all['dft_bandgap'] < 4, ['id', 'smiles', 'dft_bandgap']]
-target = fp_all.loc[fp_all['dft_bandgap'] > 6, ['id', 'smiles', 'dft_bandgap']]
+fp_all = pd.read_csv('./data/fp_all_data.csv')
+source = fp_all.loc[fp_all['dft_bandgap'] < 2.5, ['id', 'smiles', 'dft_bandgap']]
+target = fp_all.loc[fp_all['dft_bandgap'] > 4, ['id', 'smiles', 'dft_bandgap']]
 
 # num_source = len(source)  # 246
 # num_target = len(target)  # 1027
@@ -32,7 +32,7 @@ for k in pairs:
                       target.loc[target['id'] == k[1], 'smiles'].item()
    #s_vec, t_vec = get_vec(k[0]), get_vec(k[1])
    #sim = cosine_similarity(s_vec, t_vec)[0][0]
-   s_smile = s_smile.replace('[*]', '') 
+   s_smile = s_smile.replace('[*]', '')
    t_smile = t_smile.replace('[*]', '')
    sim_val = similarity(s_smile, t_smile)
    sim_dict[k] = [sim_val, s_smile*3, t_smile*3]
@@ -75,33 +75,33 @@ def split(cut_off):
 
     source_all = fix_smiles(sim_df['source_smile'].unique().tolist())
 
-    test = [i for i in source_all if i not in source_in_train]    
+    test = [i for i in source_all if i not in source_in_train]
     #train.to_csv('trial_train_' + str(len(train)) + '.csv', index=False)
     #test.to_csv('trial_test_' + str(len(test)) + '.csv', index=False)
 #     print('result: cut_off {}, size of test data {}, percent of test data {}'.format(
 #         cut_off, len(test), len(test)/len(sim_df)))
-    
+
     #save test
     #print("Hello stackoverflow!", file=open("output.txt", "a"))
     outfile = open('trial_test_' + str(len(test)) + '.txt', "w")
     print >> outfile, "\n".join(str(i) for i in test)
     #print("\n".join(str(i) for i in test), file=outfile)
     outfile.close()
-    
+
     #save train
     train_list = [i + ' ' + j for i,j in zip(train['source_smile'].tolist(), train['target_smile'].tolist())]
     outfile = open('trial_train_' + str(len(train)) + '.txt', "w")
     print >> outfile, "\n".join(str(i) for i in train_list)
     #print("\n".join(str(i) for i in train_list), file=outfile)
     outfile.close()
-    
+
     #save mols
     mols = fix_smiles([i + i+ i for i in fp_all['smiles'].tolist()])
     outfile = open("mols.txt", "w")
     print >> outfile, "\n".join(str(i) for i in mols)
     #print("\n".join(str(i) for i in mols), file=outfile)
     outfile.close()
-    
+
     return train, test
 
 def main():
