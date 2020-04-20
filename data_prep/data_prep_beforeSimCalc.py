@@ -4,9 +4,13 @@ import rdkit
 from rdkit import Chem
 from rdkit.Chem import AllChem
 import json
+import sys
+
+args= sys.argv
+path_to_data = args[1]
 
 
-fp_all = pd.read_csv('fp_all_data.csv')
+fp_all = pd.read_csv(path_to_data)
 ids = fp_all['id']
 
 def get_fp_jaccard(smiles): # smiles already fixed
