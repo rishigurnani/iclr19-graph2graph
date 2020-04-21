@@ -3,6 +3,20 @@ import numpy as np
 import sys
 import argparse
 
+parser = argparse.ArgumentParser(description='specify test data size or percent')
+parser.add_argument("--cutoff", type=float,
+                    help="test data percent")
+parser.add_argument("--percent", type=int,
+                    help="test data percent")
+parser.add_argument("--size", type=int,
+                    help="test data size")
+
+parser.add_argument("--sim_path", type=str,
+                    help="path to similarity file")
+
+parser.add_argument("--fp_path", type=str,
+                    help="path to fingerprint file")
+
 sim_df = pd.read_csv('output_sim.csv', index_col=False).reset_index()
 sim_df = sim_df.rename(columns={'index': 'source_target_id'})
 fp_all = pd.read_csv('fp_all_data.csv')
@@ -71,13 +85,6 @@ def main():
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='specify test data size or percent')
-    parser.add_argument("--cutoff", type=float,
-                        help="test data percent")
-    parser.add_argument("--percent", type=int,
-                        help="test data percent")
-    parser.add_argument("--size", type=int,
-                        help="test data size")
     main()
 
 
