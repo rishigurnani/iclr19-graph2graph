@@ -10,23 +10,27 @@ from fast_jtnn import *
 import rdkit
 
 def tensorize(smiles, assm=False):
-    mol_tree = MolTree(smiles)
-    mol_tree.recover()
-    if assm:
-        mol_tree.assemble()
+    try: #added
+        mol_tree = MolTree(smiles)
+        mol_tree.recover()
+        if assm:
+            mol_tree.assemble()
+            for node in mol_tree.nodes:
+                if node.label not in node.cands:
+                    node.cands.append(node.label)
+
+        del mol_tree.mol
         for node in mol_tree.nodes:
-            if node.label not in node.cands:
-                node.cands.append(node.label)
+            del node.mol
+            del node.clique
 
-    del mol_tree.mol
-    for node in mol_tree.nodes:
-        del node.mol
-        del node.clique
-
-    return mol_tree
+        return mol_tree
+    except: #added
+        return None
 
 def tensorize_pair(smiles_pair):
-    mol_tree0 = tensorize(smiles_pair[0], assm=False)
+    #mol_tree0 = tensorize(smiles_pair[0], assm=False)
+    mol_tree0 = tensorize(smiles_pair[0], assm=True) #added
     mol_tree1 = tensorize(smiles_pair[1], assm=True)
     return (mol_tree0, mol_tree1)
 
@@ -38,6 +42,7 @@ if __name__ == "__main__":
     parser.add_argument('--train', required=True)
     parser.add_argument('--mode', type=str, default='pair')
     parser.add_argument('--ncpu', type=int, default=8)
+    parser.add_argument('--mols_per_pkl', type=int) #added
     args = parser.parse_args()
 
     pool = Pool(args.ncpu)
@@ -49,7 +54,7 @@ if __name__ == "__main__":
 
         all_data = pool.map(tensorize_pair, data)
         #num_splits = len(data) / 10000
-        num_splits = len(data) / 2000 #added
+        num_splits = len(data) /  args.mols_per_pkl #added
 
         le = (len(all_data) + num_splits - 1) / num_splits
 
