@@ -1,7 +1,9 @@
+from __future__ import print_function
 import pandas as pd
 import numpy as np
 import sys
 import argparse
+
 
 parser = argparse.ArgumentParser(description='specify test data size or percent')
 parser.add_argument("--cutoff", type=float,
@@ -16,10 +18,11 @@ parser.add_argument("--sim_path", type=str,
 
 parser.add_argument("--fp_path", type=str,
                     help="path to fingerprint file")
+args = parser.parse_args()
 
-sim_df = pd.read_csv('output_sim.csv', index_col=False).reset_index()
+sim_df = pd.read_csv(args.sim_path, index_col=False).reset_index()
 sim_df = sim_df.rename(columns={'index': 'source_target_id'})
-fp_all = pd.read_csv('fp_all_data.csv')
+fp_all = pd.read_csv(args.fp_path)
 
 # split according to the specified test_data_size or test_data_percent
 def cal_cutoff(cut_off=None, test_data_percent=None, test_data_size=None):
@@ -73,7 +76,6 @@ def split(cut_off):
     return train, test
 
 def main():
-    args = parser.parse_args()
     cutoff = args.cutoff
     percent = args.percent
     size = args.size
