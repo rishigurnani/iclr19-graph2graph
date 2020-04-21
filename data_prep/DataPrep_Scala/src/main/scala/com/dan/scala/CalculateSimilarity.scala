@@ -20,48 +20,65 @@ object CalculateSimilarity {
   }
 
   def jaccard(x:Seq[Double], y: Seq[Double]): Double = {
-    var same_pos = x.zip(y).count(t => t._1 == 1 & t._2 == 1)
-    if (same_pos == 0) {return 0.0}
+    var samePos = x.zip(y).count(t => t._1 == 1 & t._2 == 1)
+    if (samePos == 0) {return 0.0}
     var diff = x.zip(y).count(t => t._1 != t._2)
-    var res = same_pos/(same_pos+diff).toDouble
+    var res = samePos/(samePos+diff).toDouble
     println(res)
     res
   }
 
   def main(args: Array[String]): Unit = {
-    val spark = SparkHelper.spark
-    spark.sparkContext.setLogLevel("WARN")
-    import spark.implicits._
-
-    val fp_info = spark.read.json("data/fp_info.json") // for calculating the jaccard similarity
-//    val fp_info = spark.read.json("data/vec_info.json") // for calculating the cosine similarity
-
-    // source and target split
-    val source_df = fp_info.filter($"dft_bandgap" < 4)
-    val target_df = fp_info.filter($"dft_bandgap" > 6)
-    // cross join, 420640 rows
-    source_df.createOrReplaceTempView("source")
-    target_df.createOrReplaceTempView("target")
-    val df = spark.sql("select source.fp as s_fp, target.fp as t_fp, source.smiles as source_smile, target.smiles as target_smile from source CROSS JOIN target")
+    val dataFolder = args(0).toString
+    val similarityMethod = args(1).toString.toUpperCase
+    val demoSize = args(2).toInt
+    println(dataFolder, similarityMethod, demoSize)
 
     // calculate the jaccard score
     def jaccardFunc(x: Seq[Double], y:Seq[Double]): Double= {
       jaccard(x, y)
     }
-    val myUDF = udf(jaccardFunc _)
+    // calculate the cosine score
+    def cosineFunc(x: Seq[Double], y:Seq[Double]): Double= {
+      cosineSimilarity(x, y)
+    }
 
-//    // calculate the cosine score
-//    def cosineFunc(x: Seq[Double], y:Seq[Double]): Double= {
-//      cosineSimilarity(x, y)
-//    }
-//    val myUDF = udf(cosineFunc _)
+    val spark = SparkHelper.spark
+    spark.sparkContext.setLogLevel("WARN")
+    import spark.implicits._
+
+    val info =
+      if (similarityMethod == "T") {
+        spark.read.json(dataFolder + "/fp_info.json")
+      } else spark.read.json(dataFolder + "/vec_info.json")
+
+    val savePath =
+      if (similarityMethod == "T") {
+        "fp_sim"
+      } else "cosine_sim"
+
+    val myUDF =
+      if (similarityMethod == "T") {
+        udf(jaccardFunc _)
+    } else udf(cosineFunc _)
+
+    info.createOrReplaceTempView("all_info")
+    val dfDemo = spark.sql("select * from all_info").limit(demoSize)
+
+    // source and target split
+    val sourceDf = dfDemo.filter($"dft_bandgap" < 4)
+    val targetDf = dfDemo.filter($"dft_bandgap" > 6)
+    // cross join, 420640 rows
+    sourceDf.createOrReplaceTempView("source")
+    targetDf.createOrReplaceTempView("target")
+    val df = spark.sql("select source.fp as s_fp, target.fp as t_fp, source.smiles as source_smile, target.smiles as target_smile from source CROSS JOIN target")
 
     val newDF = df.withColumn("similarity_score", myUDF(df("s_fp"), df("t_fp")))
     val res = newDF.drop("s_fp", "t_fp")
 
-    val file_path = "fp_sim"
-//    val file_path = "cosine_sim"
-    res.coalesce(1).write.option("header","true").option("sep",",").mode("overwrite").csv(file_path)
+    // save
+    res.coalesce(1).write.option("header","true").option("sep",",").mode("overwrite").csv(savePath)
     spark.stop()
+
   }
 }
