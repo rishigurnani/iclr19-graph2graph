@@ -56,15 +56,15 @@ for i in range(NUM):
 #         os.system('python ~/iclr19-graph2graph/diff_vae/decode.py --num_decode %s --test %stest.txt --vocab %svocab.txt --model %s --use_molatt | python ~/iclr19-graph2graph/scripts/bg_score.py %s > results.%s' %(N_DECODE, DATA_DIR, DATA_DIR, f, BG_PATH, str(i)))
         os.system('python ~/iclr19-graph2graph/diff_vae/decode.py --num_decode %s --test %stest.txt --vocab %svocab.txt --model %s --use_molatt > decoded_polymers.txt' %(N_DECODE, DATA_DIR, DATA_DIR, f))
         os.system('python ~/iclr19-graph2graph/scripts/bg_score.py %s < decoded_polymers.txt > results.%s' %(BG_PATH, str(i)))
-        
+
         os.system('python ~/iclr19-graph2graph/scripts/bg_analyze.py --num_decode %s --sim_delta .2 --prop_delta 6 --total_n %s --mols_path %smols.txt < results.%s > analyze.%s' %(N_DECODE, total_n, DATA_DIR, str(i), str(i)) )
         with open('analyze.%s' %(str(i)) ) as f:
             lines = tail(f, 2)
-        
+
         split_lines = lines.split('\n')
         acc = float(split_lines[0].split()[2])
         div = float(split_lines[1].split()[2])
-        
+
         if acc > max_acc:
             max_acc = acc
             best_epoch_acc = i
@@ -77,4 +77,3 @@ print "Accuracy for best model: ", max_acc
 
 print "Epoch with most diverse model: ", best_epoch_div
 print "Diversity of that model: ", max_div
-    

@@ -62,7 +62,7 @@ def fix_fp():
     df = df.round(decimals=5)
     df.to_csv('fp_df_fixed.csv')
     return ind2ID_map
-    
+
 def create_pred_input(model_path):
     f = ('file_model = ' + model_path + '\n'
     'file_fingerprint  = fp_df_fixed.csv\n'
@@ -70,7 +70,7 @@ def create_pred_input(model_path):
     )
     text_file = open('pred_input', "w")
     text_file.write(f)
-    text_file.close()    
+    text_file.close()
 
 def run_pred():
     try:
@@ -79,7 +79,7 @@ def run_pred():
         pass
 
 def get_pred():
-    
+
     df = pd.read_csv('output.csv')
     normed = df['y'].tolist()
     original_scale = [(val*1.67668) + 4.34115 for val in normed]
@@ -94,12 +94,12 @@ def get_all_preds(l):
     run_fp()
 
     ind2ID_map = fix_fp()
-    
+
     create_pred_input(model_path)
 
     run_pred()
 
-    return ind2ID_map, get_pred()    
+    return ind2ID_map, get_pred()
 
 #perform tasks
 ys = []

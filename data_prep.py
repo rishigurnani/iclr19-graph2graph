@@ -64,7 +64,7 @@ def evaluate_pair(k):
     '''
     s_smile, t_smile = source.loc[source['id'] == k[0], 'smiles'].item(), \
                           target.loc[target['id'] == k[1], 'smiles'].item()
-    s_smile = multiply_one_smiles_new(s_smile) 
+    s_smile = multiply_one_smiles_new(s_smile)
     t_smile = multiply_one_smiles_new(t_smile)
     sim_val = similarity(s_smile, t_smile)
     return k, sim_val, s_smile, t_smile
@@ -79,7 +79,7 @@ if not args.load_sim:
 #                           target.loc[target['id'] == k[1], 'smiles'].item()
 #        #s_vec, t_vec = get_vec(k[0]), get_vec(k[1])
 #        #sim = cosine_similarity(s_vec, t_vec)[0][0]
-#         s_smile = multiply_one_smiles_new(s_smile) 
+#         s_smile = multiply_one_smiles_new(s_smile)
 #         t_smile = multiply_one_smiles_new(t_smile)
 #         print t_smile
 #         try:
@@ -91,7 +91,7 @@ if not args.load_sim:
     sim_list = Parallel(n_jobs=args.n_core)(delayed(evaluate_pair)(k) for k in pairs)
     sim_dict = {val[0]:val[1:] for val in sim_list}
     del sim_list
-        
+
     output_path = open(args.sim_path, 'wb')
     pkl.dump(sim_dict, output_path)
 else:
@@ -121,7 +121,7 @@ def fix_smiles(l):
 def split(cut_off):
     #test = sim_df.loc[sim_df['similarity_score'] < cut_off, :]
     train = sim_df.loc[sim_df['similarity_score'] >= cut_off, :]
-    
+
     #source_smile_fix = fix_smiles(train['source_smile'])
     #train['source_smile'] = source_smile_fix
     source_smile_fix = train['source_smile']
@@ -129,31 +129,31 @@ def split(cut_off):
     #target_smile_fix = fix_smiles(train['target_smile'])
     #train['target_smile'] = target_smile_fix
     target_smile_fix = train['target_smile']
-    
+
     source_in_train = fix_smiles(train['source_smile'].unique().tolist())
 
     source_all = fix_smiles(sim_df['source_smile'].unique().tolist())
 
-    test = [i for i in source_all if i not in source_in_train]    
+    test = [i for i in source_all if i not in source_in_train]
     #train.to_csv('trial_train_' + str(len(train)) + '.csv', index=False)
     #test.to_csv('trial_test_' + str(len(test)) + '.csv', index=False)
 #     print('result: cut_off {}, size of test data {}, percent of test data {}'.format(
 #         cut_off, len(test), len(test)/len(sim_df)))
-    
+
     #save test
     #print("Hello stackoverflow!", file=open("output.txt", "a"))
     outfile = open('trial_test_' + str(len(test)) + '.txt', "w")
     print >> outfile, "\n".join(str(i) for i in test)
     #print("\n".join(str(i) for i in test), file=outfile)
     outfile.close()
-    
+
     #save train
     train_list = [i + ' ' + j for i,j in zip(train['source_smile'].tolist(), train['target_smile'].tolist())]
     outfile = open('trial_train_' + str(len(train)) + '.txt', "w")
     print >> outfile, "\n".join(str(i) for i in train_list)
     #print("\n".join(str(i) for i in train_list), file=outfile)
     outfile.close()
-    
+
     #save mols
     mols = [multiply_one_smiles_new(s) for s in fp_all['smiles'].tolist()]
     #mols = fix_smiles([i + i+ i for i in fp_all['smiles'].tolist()])
@@ -162,7 +162,7 @@ def split(cut_off):
     print >> outfile, "\n".join(str(i) for i in mols)
     #print("\n".join(str(i) for i in mols), file=outfile)
     outfile.close()
-    
+
     return train, test
 
 def main():
@@ -184,7 +184,7 @@ if __name__ == '__main__':
 #                         help="test data size")
 #     parser.add_argument("--load_sim", type=bool, help="should similarities be loaded?")
 #     parse.add_argument("--sim_path", type=str, help="filename where the similarity dict should be saved to or loaded from?=")
-    
+
     main()
     end = time.time()
     print "Time Elapsed: %s" %(end-start)
