@@ -35,7 +35,7 @@ A quick summary of different folders:
 ## Contact
 | Name         | Email                     |
 |--------------|---------------------------|
-| Usman Ashraf | usman.ashraf678@gmail.com |
+| Usman Ashraf | usman.ashraf678@gatech.edu |
 | Rishi Gurnani | rgurnani96@gatech.edu |
 | Kenny Scharm | kscharm3@gatech.edu |
-| Dan Tu | tudan0103@gmail.com |
+| Dan Tu | dan.tu@gatech.edu |
