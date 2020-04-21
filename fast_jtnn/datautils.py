@@ -89,7 +89,12 @@ class PairTreeDataset(Dataset):
         return len(self.data)
     
     def __getitem__(self, idx):
+        #print type(self.data[idx])
+        #print self.data[idx][0]
+        #print self.data[idx]
         batch0, batch1 = zip(*self.data[idx])
+        #batch0 = self.data[idx][0:10]
+        #batch1 = self.data[idx][10:]
         return tensorize(batch0, self.vocab, assm=False), tensorize(batch1, self.vocab, assm=self.y_assm)
 
 class MolTreeDataset(Dataset):
@@ -122,6 +127,10 @@ def tensorize(tree_batch, vocab, assm=True):
             if node.is_leaf or len(node.cands) == 1: continue
             cands.extend( [(cand, mol_tree.nodes, node) for cand in node.cands] )
             batch_idx.extend([i] * len(node.cands))
+            #neighs = node.neighbors #added
+            #if node.is_leaf or len(neighs) == 1: continue #added
+            #cands.extend( [(cand, mol_tree.nodes, node) for cand in neighs] ) #added
+            #batch_idx.extend([i] * len(neighs)) #added
 
     jtmpn_holder = JTMPN.tensorize(cands, mess_dict)
     batch_idx = torch.LongTensor(batch_idx)
