@@ -14,6 +14,13 @@ This is an extension of the junction tree encoder-decoder model in https://arxiv
 The code has been tested under Python 2.7 with PyTorch 0.4.1.
 
 ## Quick Start
+Before you get started, you will need to create a `/data` folder and import a SMILES strings dataset.
+
+You will need to split your dataset into three subsets (each separated by new line characters):
+* Training pairs set of SMILES strings
+* Test set of SMILES strings
+* Validation set of SMILES strings
+
 The tutorial of training and testing the variational junction tree encoder-decoder is in [diff_vae/README.md](./diff_vae).
 
 A quick summary of different folders:
