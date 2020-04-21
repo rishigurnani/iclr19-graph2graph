@@ -52,11 +52,24 @@ def run_fp():
 def fix_fp():
     df = pd.read_csv('fp_df.csv')
     #df = df.iloc[df.dropna().index].reset_index().drop('index', axis=1)
+<<<<<<< HEAD
     df = df.iloc[df.dropna().index]
     df = df.set_index('ID')
     #use_cols = [col for col in df.keys() if col != 'ID' and 'Unnamed' not in col]
     #df.drop_duplicates(subset=use_cols, inplace=True)
     df.to_csv('fp_df_fixed.csv')
+=======
+    bad_inds = df.dropna().index
+    df = df.iloc[bad_inds]
+    #df = df.set_index('ID')
+    df = df.reset_index().drop('index', axis=1)
+    ind2ID_map = {k:v for k,v in zip(df.index.tolist(), df['ID'].tolist())}
+    #use_cols = [col for col in df.keys() if col != 'ID' and 'Unnamed' not in col]
+    #df.drop_duplicates(subset=use_cols, inplace=True)
+    df = df.round(decimals=5)
+    df.to_csv('fp_df_fixed.csv')
+    return ind2ID_map
+>>>>>>> dc0a39c35bb6a3dd7ac5c6d2aa18f3a1dabebed0
     
 def create_pred_input(model_path):
     f = ('file_model = ' + model_path + '\n'
@@ -88,32 +101,56 @@ def get_all_preds(l):
 
     run_fp()
 
+<<<<<<< HEAD
     fix_fp()
+=======
+    ind2ID_map = fix_fp()
+>>>>>>> dc0a39c35bb6a3dd7ac5c6d2aa18f3a1dabebed0
     
     create_pred_input(model_path)
 
     run_pred()
 
+<<<<<<< HEAD
     return get_pred()    
+=======
+    return ind2ID_map, get_pred()    
+>>>>>>> dc0a39c35bb6a3dd7ac5c6d2aa18f3a1dabebed0
 
 #perform tasks
 ys = []
 xs = []
+<<<<<<< HEAD
 sim2Ds = []
+=======
+>>>>>>> dc0a39c35bb6a3dd7ac5c6d2aa18f3a1dabebed0
 for line in sys.stdin:
     x,y = line.split()
     ys.append(y)
     xs.append(x)
     if y == "None": y = None
+<<<<<<< HEAD
     #sim2Ds.append(similarity(x, y))
 
 outs = get_all_preds(ys)
+=======
+
+ind2ID_map, outs = get_all_preds(ys)
+>>>>>>> dc0a39c35bb6a3dd7ac5c6d2aa18f3a1dabebed0
 
 for out in outs:
     ind = out[0]
     bg = out[1]
+<<<<<<< HEAD
     x = xs[ind]
     y = ys[ind]
+=======
+    ID = ind2ID_map[ind]
+    #x = xs[ind]
+    #y = ys[ind]
+    x = xs[ID]
+    y = ys[ID]
+>>>>>>> dc0a39c35bb6a3dd7ac5c6d2aa18f3a1dabebed0
     sim2D = similarity(x, y)
     try:
         print ind, x, y, sim2D, bg

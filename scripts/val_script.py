@@ -53,7 +53,14 @@ for i in range(NUM):
     f="%s/model.iter-%s" %(DIR, str(i))
     print(f)
     if os.path.isfile(f):
+<<<<<<< HEAD
         os.system('python ~/iclr19-graph2graph/diff_vae/decode.py --num_decode %s --test %stest.txt --vocab %svocab.txt --model %s --use_molatt | python ~/iclr19-graph2graph/scripts/bg_score.py %s > results.%s' %(N_DECODE, DATA_DIR, DATA_DIR, f, BG_PATH, str(i)))
+=======
+#         os.system('python ~/iclr19-graph2graph/diff_vae/decode.py --num_decode %s --test %stest.txt --vocab %svocab.txt --model %s --use_molatt | python ~/iclr19-graph2graph/scripts/bg_score.py %s > results.%s' %(N_DECODE, DATA_DIR, DATA_DIR, f, BG_PATH, str(i)))
+        os.system('python ~/iclr19-graph2graph/diff_vae/decode.py --num_decode %s --test %stest.txt --vocab %svocab.txt --model %s --use_molatt > decoded_polymers.txt' %(N_DECODE, DATA_DIR, DATA_DIR, f))
+        os.system('python ~/iclr19-graph2graph/scripts/bg_score.py %s < decoded_polymers.txt > results.%s' %(BG_PATH, str(i)))
+        
+>>>>>>> dc0a39c35bb6a3dd7ac5c6d2aa18f3a1dabebed0
         os.system('python ~/iclr19-graph2graph/scripts/bg_analyze.py --num_decode %s --sim_delta .2 --prop_delta 6 --total_n %s --mols_path %smols.txt < results.%s > analyze.%s' %(N_DECODE, total_n, DATA_DIR, str(i), str(i)) )
         with open('analyze.%s' %(str(i)) ) as f:
             lines = tail(f, 2)
