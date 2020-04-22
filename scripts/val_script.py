@@ -7,7 +7,8 @@ DIR=args[1] #model directory
 NUM=int(args[2]) #number of models to test
 N_DECODE=args[3] #number of monomers per test monomers #number of test monomers
 BG_PATH=args[4] #path to bandgap predictor
-DATA_DIR=args[5]
+DATA_DIR=args[5] #path to data
+ICLR_DIR=args[6] #path to iclr directory
 
 if DIR[-1] == '/':
     DIR = DIR[:-1]
@@ -54,10 +55,10 @@ for i in range(NUM):
     print(f)
     if os.path.isfile(f):
 #         os.system('python ~/iclr19-graph2graph/diff_vae/decode.py --num_decode %s --test %stest.txt --vocab %svocab.txt --model %s --use_molatt | python ~/iclr19-graph2graph/scripts/bg_score.py %s > results.%s' %(N_DECODE, DATA_DIR, DATA_DIR, f, BG_PATH, str(i)))
-        os.system('python ~/iclr19-graph2graph/diff_vae/decode.py --num_decode %s --test %stest.txt --vocab %svocab.txt --model %s --use_molatt > decoded_polymers.txt' %(N_DECODE, DATA_DIR, DATA_DIR, f))
-        os.system('python ~/iclr19-graph2graph/scripts/bg_score.py %s < decoded_polymers.txt > results.%s' %(BG_PATH, str(i)))
+        os.system('python %s/iclr19-graph2graph/diff_vae/decode.py --num_decode %s --test %stest.txt --vocab %svocab.txt --model %s --use_molatt > decoded_polymers.txt' %(ICLR_DIR, N_DECODE, DATA_DIR, DATA_DIR, f))
+        os.system('python %s/iclr19-graph2graph/scripts/bg_score.py %s < decoded_polymers.txt > results.%s' %(ICLR_DIR, BG_PATH, str(i)))
 
-        os.system('python ~/iclr19-graph2graph/scripts/bg_analyze.py --num_decode %s --sim_delta .2 --prop_delta 6 --total_n %s --mols_path %smols.txt < results.%s > analyze.%s' %(N_DECODE, total_n, DATA_DIR, str(i), str(i)) )
+        os.system('python %s/iclr19-graph2graph/scripts/bg_analyze.py --num_decode %s --sim_delta .2 --prop_delta 6 --total_n %s --mols_path %smols.txt < results.%s > analyze.%s' %(ICLR_DIR, N_DECODE, total_n, DATA_DIR, str(i), str(i)) )
         with open('analyze.%s' %(str(i)) ) as f:
             lines = tail(f, 2)
 

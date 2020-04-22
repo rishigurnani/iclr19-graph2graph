@@ -61,6 +61,7 @@ if __name__ == "__main__":
         for split_id in xrange(num_splits):
             st = split_id * le
             sub_data = all_data[st : st + le]
+            sub_data = [s for s in sub_data if s[0]!=None and s[1]!=None]
 
             with open('tensors-%d.pkl' % split_id, 'wb') as f:
                 pickle.dump(sub_data, f, pickle.HIGHEST_PROTOCOL)

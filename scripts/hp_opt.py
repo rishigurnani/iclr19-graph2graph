@@ -2,16 +2,36 @@ import os
 import sys
 from multiprocessing import Pool
 import time
+import argparse
 
-args = sys.argv
-#n_core = args[1]
+parser = argparse.ArgumentParser(description='specify test data size or percent')
+parser.add_argument("--lr_grid", type=float,
+                    help="list of learning rates to try out", nargs='+', default = [.001])
+parser.add_argument("--bs_grid", type=int,
+                    help="list of batch sizes to try out", nargs='+', default=[32])
+parser.add_argument("--dT_grid", type=int,
+                    help="list of depthT values to try out", nargs='+', default=[6])
+
+parser.add_argument("--dG_grid", type=int,
+                    help="list of depthT values to try out", nargs='+', default=[8])
+
+parser.add_argument("--epochs", type=int,
+                    help="number of epochs", default=2)
+
+parser.add_argument("--n_decode", type=int,
+                    help="number of translated polymers per source polymer", default=2)
+
+parser.add_argument("--iclr_dir", type=str,
+                    help="directory containing repository", default='/home/rgur/g2g_new')
+
+args = parser.parse_args()
 
 skip = [] #add hyperparameter combos which should be skipped
 
-params = {'lr': [.001, .005, .0002],
-         'batch_size': [8, 32],
-          'depthT': [6],
-          'depthG': [3, 8]
+params = {'lr': args.lr_grid,
+         'batch_size': args.bs_grid,
+          'depthT': args.dT_grid,
+          'depthG': args.dG_grid
          }
 
 # params = {'lr': [.0002],
@@ -20,9 +40,9 @@ params = {'lr': [.001, .005, .0002],
 #           'depthG': [3]
 #          }
 
-epochs = 4 #default is 5
+epochs = args.epochs
 
-n_decode = 8 #default is 10
+n_decode = args.n_decode #default is 10
 
 bg_path = '~/CS6250_project/models/trial2/all_features/model.pkl' #path to property predictor
 
@@ -57,9 +77,9 @@ for lr in params['lr']:
                     if not os.path.isdir(results_dir):
                         os.makedirs(results_dir)
                     os.chdir(results_dir)
-                    os.system('python /home/rgur/iclr19-graph2graph/diff_vae/vae_train.py --train %s --vocab %svocab.txt --save_dir %s \
-                --hidden_size 300 --rand_size 16 --epoch %s --anneal_rate 0.8 --lr %s --batch_size %s --depthT %s --depthG %s | tee %s/LOG' %(processed_dir, data_dir, models_dir, epochs, lr, batch_size, depthT, depthG, models_dir) )
-                    os.system('python /home/rgur/iclr19-graph2graph/scripts/val_script.py %s %s %s %s %s > %sbest_of_round.txt' %(models_dir, str(epochs), n_decode, bg_path, data_dir, path) )
+                    os.system('python %s/iclr19-graph2graph/diff_vae/vae_train.py --train %s --vocab %svocab.txt --save_dir %s \
+                --hidden_size 300 --rand_size 16 --epoch %s --anneal_rate 0.8 --lr %s --batch_size %s --depthT %s --depthG %s | tee %s/LOG' %(args.iclr_dir,processed_dir, data_dir, models_dir, epochs, lr, batch_size, depthT, depthG, models_dir) )
+                    os.system('python %s/iclr19-graph2graph/scripts/val_script.py %s %s %s %s %s %s > %sbest_of_round.txt' %(args.iclr_dir, models_dir, str(epochs), n_decode, bg_path, data_dir, args.iclr_dir, path) )
                     
                     n_epoch = 0
                     best_acc = 0.0
