@@ -24,6 +24,9 @@ parser.add_argument("--n_decode", type=int,
 parser.add_argument("--iclr_dir", type=str,
                     help="directory containing repository", default='/home/rgur/g2g_new')
 
+parser.add_argument("--load_epoch", type=int,
+                    help="directory containing repository", default=-1)
+
 args = parser.parse_args()
 
 skip = [] #add hyperparameter combos which should be skipped
