@@ -9,7 +9,15 @@ N_DECODE=args[3] #number of monomers per test monomers #number of test monomers
 BG_PATH=args[4] #path to bandgap predictor
 DATA_DIR=args[5] #path to data
 ICLR_DIR=args[6] #path to iclr directory
-
+try:
+    start_epoch=int(args[7])
+except:
+    start_epoch = 0
+try:
+    SIM_DELTA=float(args[8])
+except:
+    SIM_DELTA =.2
+    
 if DIR[-1] == '/':
     DIR = DIR[:-1]
 
@@ -50,7 +58,7 @@ max_div = 0.0
 best_epoch_div = 0
 
 for i in range(NUM):
-    #i += 7 #comment out later
+    i += start_epoch
     f="%s/model.iter-%s" %(DIR, str(i))
     print(f)
     if os.path.isfile(f):
@@ -58,7 +66,7 @@ for i in range(NUM):
         os.system('python %s/iclr19-graph2graph/diff_vae/decode.py --num_decode %s --test %stest.txt --vocab %svocab.txt --model %s --use_molatt > decoded_polymers.%s' %(ICLR_DIR, N_DECODE, DATA_DIR, DATA_DIR, f, str(i)))
         os.system('python %s/iclr19-graph2graph/scripts/bg_score.py %s < decoded_polymers.%s > results.%s' %(ICLR_DIR, BG_PATH, str(i), str(i)))
 
-        os.system('python %s/iclr19-graph2graph/scripts/bg_analyze.py --num_decode %s --sim_delta .2 --prop_delta 6 --total_n %s --mols_path %smols.txt < results.%s > analyze.%s' %(ICLR_DIR, N_DECODE, total_n, DATA_DIR, str(i), str(i)) )
+        os.system('python %s/iclr19-graph2graph/scripts/bg_analyze.py --num_decode %s --sim_delta %s --prop_delta 6 --total_n %s --mols_path %smols.txt < results.%s > analyze.%s' %(ICLR_DIR, N_DECODE, SIM_DELTA, total_n, DATA_DIR, str(i), str(i)) )
         with open('analyze.%s' %(str(i)) ) as f:
             lines = tail(f, 2)
 

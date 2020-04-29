@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 import sys
-from props import *
+#from props import *
 
 import time
 
