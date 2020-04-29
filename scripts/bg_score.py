@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import sys
 #from props import *
+from poly_diversity import similarity
 
 import time
 

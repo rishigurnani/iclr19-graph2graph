@@ -6,7 +6,9 @@ import argparse
 from skopt import gp_minimize
 import sys
 sys.path.append('/home/rishi/py_scripts')
+sys.path.append('/home/rgur/py_scripts')
 import rishi_utils as ru
+from rishi_utils import mkdir_existOk
 import random
 
 parser = argparse.ArgumentParser(description='specify test data size or percent')
@@ -34,13 +36,8 @@ parser.add_argument('--bayesian', action='store_true', help='should hyperparamet
 parser.add_argument("--iclr_dir", type=str,
                     help="directory containing repository", default='/home/rgur/g2g_new')
 
-<<<<<<< HEAD
-parser.add_argument("--load_epoch", type=int,
-                    help="directory containing repository", default=-1)
-=======
 parser.add_argument("--n_calls", type=int,
                     help="number of points in hp space to sample", default=10)
->>>>>>> 3031cfb50f7ffbf58fed267430d40dcbc03d90d8
 
 args = parser.parse_args()
 
@@ -92,8 +89,10 @@ space = [tuple(args.hs_grid), #hidden_size
 
 data_dir = cwd + 'data/'
 processed_dir = cwd + 'processed/'
-frac = .2
+test_frac = .2
+train_frac = .6
 SIM_DELTA = .075
+N_THREADS = 4
 
 def train_model(hidden_size, batch_size, depthT, depthG, lr, models_dir, results_dir):
     os.system('python %s/iclr19-graph2graph/diff_vae/vae_train.py --train %s --vocab %svocab.txt --save_dir %s \
@@ -129,8 +128,8 @@ def validate(path, models_dir):
     
     srt_acc = sorted(best_results, key=lambda x: x[2], reverse=True)
     srt_div = sorted(diversity_results, key=lambda x: x[2], reverse=True)
-    print("Acc %s" %srt_acc[0][2])
-    return srt_acc[0][2] #top accuracy    
+    #print("Acc %s" %srt_acc[0][2])
+    return float(srt_acc[0][2]) #top accuracy    
 
 def objective(params):
     round_start = time.time()
@@ -170,16 +169,18 @@ def make_hp_data():
     keep_test = []
     with open('%stest.txt' %data_dir, 'r') as handle:
         for line in handle:
-            if random.random() <= frac:
+            if random.random() <= test_frac:
                 keep_test.append(line.split()[0])
-
+    print "Testing on %s polymers" %( len(keep_test) )
+    
     keep_train = []
     with open('%strain.txt' %data_dir, 'r') as handle:
         for line in handle:
-            if random.random() <= frac:
+            if random.random() <= train_frac:
                 keep_train.append(' '.join(line.split()))
+    print "Training on %s pairs" %( len(keep_train) )
 
-    ru.mkdir_existOk(hp_data_dir)
+    mkdir_existOk(hp_data_dir)
     ru.write_list_to_file(keep_test, '%stest.txt' %hp_data_dir)
     ru.write_list_to_file(keep_train, '%strain.txt' %hp_data_dir)
    
@@ -194,7 +195,7 @@ def make_hp_data():
     os.system('python %siclr19-graph2graph/scripts/preprocess.py --train %strain.txt --mols_per_pkl 400 \
     --ncpu 8' %(args.iclr_dir, hp_data_dir) )
     hp_processed_dir = '%sprocessed/' %hp_data_dir
-    ru.mkdir_existOk(hp_processed_dir)
+    mkdir_existOk(hp_processed_dir)
     os.system('mv tensor* %s' %hp_processed_dir)
     os.system('python %siclr19-graph2graph/fast_jtnn/mol_tree.py < %smols.txt > %svocab.txt' %
               (args.iclr_dir, hp_data_dir, hp_data_dir) )
@@ -204,7 +205,7 @@ if args.bayesian:
     make_hp_data()
     data_dir = hp_data_dir
     processed_dir = '%sprocessed/' %hp_data_dir 
-    r = gp_minimize(objective, space, n_calls=args.n_calls)
+    r = gp_minimize(objective, space, n_calls=args.n_calls, n_jobs=N_THREADS)
     print "Optimized HPs are %s" %r.x
 
 else:

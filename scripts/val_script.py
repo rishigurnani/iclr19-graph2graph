@@ -62,7 +62,6 @@ for i in range(NUM):
     f="%s/model.iter-%s" %(DIR, str(i))
     print(f)
     if os.path.isfile(f):
-#         os.system('python ~/iclr19-graph2graph/diff_vae/decode.py --num_decode %s --test %stest.txt --vocab %svocab.txt --model %s --use_molatt | python ~/iclr19-graph2graph/scripts/bg_score.py %s > results.%s' %(N_DECODE, DATA_DIR, DATA_DIR, f, BG_PATH, str(i)))
         os.system('python %s/iclr19-graph2graph/diff_vae/decode.py --num_decode %s --test %stest.txt --vocab %svocab.txt --model %s --use_molatt > decoded_polymers.%s' %(ICLR_DIR, N_DECODE, DATA_DIR, DATA_DIR, f, str(i)))
         os.system('python %s/iclr19-graph2graph/scripts/bg_score.py %s < decoded_polymers.%s > results.%s' %(ICLR_DIR, BG_PATH, str(i), str(i)))
 
