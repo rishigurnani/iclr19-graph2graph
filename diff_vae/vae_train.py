@@ -13,6 +13,7 @@ import cPickle as pickle
 
 from fast_jtnn import *
 import rdkit
+import sys
 
 lg = rdkit.RDLogger.logger() 
 lg.setLevel(rdkit.RDLogger.CRITICAL)
@@ -39,7 +40,9 @@ parser.add_argument('--lr', type=float, default=1e-3)
 
 args = parser.parse_args()
 print args
-  
+sys.setrecursionlimit(5000)
+print "Max recursion depth is %s" %sys.getrecursionlimit()
+
 vocab = [x.strip("\r\n ") for x in open(args.vocab)] 
 vocab = Vocab(vocab)
 

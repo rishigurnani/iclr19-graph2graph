@@ -42,7 +42,7 @@ if __name__ == "__main__":
     parser.add_argument('--train', required=True)
     parser.add_argument('--mode', type=str, default='pair')
     parser.add_argument('--ncpu', type=int, default=8)
-    parser.add_argument('--mols_per_pkl', type=int) #added
+    parser.add_argument('--mols_per_pkl', type=int, default=1000) #added
     args = parser.parse_args()
 
     pool = Pool(args.ncpu)
