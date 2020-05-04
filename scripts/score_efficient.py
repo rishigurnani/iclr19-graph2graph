@@ -5,6 +5,10 @@ import sys
 from poly_diversity import similarity
 import argparse
 import time
+import sys
+sys.path.append('/home/rgur/py_scripts/')
+sys.path.append('/home/rishi/py_scripts/')
+import rishi_utils as ru
 
 parser = argparse.ArgumentParser(description='specify test data size or percent')
 
@@ -14,8 +18,6 @@ parser = argparse.ArgumentParser(description='specify test data size or percent'
 # 3) have function named 'main' which returns necessary data
 parser.add_argument("--predictors", type=str,
                     help="list of python files to run for property evaluation", nargs='+') 
-# parser.add_argument("--prop_names", type=str,
-#                     help="list of names for each property", nargs='+')
 args = parser.parse_args()
 
 n_prop = len(args.predictors)
@@ -31,12 +33,14 @@ for i, module in enumerate(modules):
     functions.append( 'main_%s' %i )
     exec( 'from %s import main as main_%s' %(module, i) )
 
-def save_smiles_df(l):
+def save_smiles_df(y_map):
     '''
     Save df from list of SMILES
     '''
-    n_smiles = len(l)
-    ID = list(range(n_smiles))
+#     n_smiles = len(l)
+#     ID = list(range(n_smiles))
+    ID = y_map.keys()
+    l = y_map.values()
     pd.DataFrame({"ID": ID, "SMILES": l}).to_csv('./smiles_df.csv')
 
 def create_fp_input():
@@ -94,43 +98,37 @@ def run_pred():
     except:
         pass
 
-def get_all_preds(l):
-    save_smiles_df(l)
-
-    create_fp_input()
-
-    run_fp()
-
-    ind2ID_map = fix_fp()
-
-    create_pred_input(model_path)
-
-    run_pred()
-
-    return ind2ID_map, get_pred()
-
 #perform tasks
 ys = []
 xs = []
 lines = []
+y_map={}
+y_inds = []
+count = 0
 for line in sys.stdin:
     if line not in lines: #delete duplicate source:target pairs
         lines.append(line)
         x,y = line.split()
+        try:
+            y_ind = ys.index(y)
+            y_inds.append(y_ind)
+        except:
+            y_inds.append(count)
+            y_map[count] = y
+            count+=1
         ys.append(y)
         xs.append(x)
         if y == "None": y = None
 
-
+occurence_map = {s:ru.getIndexPositions(y_inds, s) for s in set(y_inds)}
             
-save_smiles_df(ys)
+save_smiles_df(y_map)
 
 create_fp_input()
 
 run_fp()
 
 ind2ID_map = fix_fp()
-#ind2ID_map, outs = get_all_preds(ys)
 
 props = []
 for f in functions:
@@ -148,14 +146,13 @@ def tup_to_str(tup):
     return ' '.join(l)
 
 for ind, prop in enumerate(zipped_props):
-    ID = ind2ID_map[ind]
-    #x = xs[ind]
-    #y = ys[ind]
-    x = xs[ID]
-    y = ys[ID]
-    sim2D = similarity(x, y)
-    prop_string = tup_to_str(prop)
-    try:
-        print ind, x, y, sim2D, prop_string
-    except:
-        print ind, x, y, sim2D, 0.0
+    smilesdf_ID = ind2ID_map[ind] #ID: index of smiles_df aka index before dropping cols during fingerprint
+    for og_row_num in occurence_map[smilesdf_ID]: #og_row_num: row number after deleting identical translations from same source
+        x = xs[og_row_num]
+        y = ys[og_row_num]
+        sim2D = similarity(x, ru.depolymerize(y))
+        prop_string = tup_to_str(prop)
+        try:
+            print ind, x, y, sim2D, prop_string
+        except:
+            print ind, x, y, sim2D, 0.0
