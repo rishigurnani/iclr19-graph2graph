@@ -8,7 +8,6 @@ vectorizer = CountVectorizer(analyzer="char")
 import pickle as pkl
 import sys
 import argparse
-from props import *
 import sys
 import time
 from joblib import Parallel, delayed
@@ -19,6 +18,21 @@ sys.path.append('/home/rgur/py_scripts')
 import rishi_utils as ru
 
 import auxFunctions as aF
+import rdkit
+from rdkit import Chem, DataStructs
+from rdkit.Chem import AllChem
+
+# Tanimoto similarity function
+def similarity(a, b):
+    if a is None or b is None:
+        return 0.0
+    amol = Chem.MolFromSmiles(a)
+    bmol = Chem.MolFromSmiles(b)
+    if amol is None or bmol is None:
+        return 0.0
+    fp1 = AllChem.GetMorganFingerprintAsBitVect(amol, 2, nBits=2048, useChirality=False)
+    fp2 = AllChem.GetMorganFingerprintAsBitVect(bmol, 2, nBits=2048, useChirality=False)
+    return DataStructs.TanimotoSimilarity(fp1, fp2)
 
 parser = argparse.ArgumentParser(description='specify test data size or percent')
 parser.add_argument("--cutoff", type=float,

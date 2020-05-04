@@ -84,8 +84,8 @@ for line in stdin:
 
 float_str = ','.join(['float(prop%s)' %i for i in range(n_prop)])
 parse_str = ','.join(['prop%s' %i for i in range(n_prop)])
-if len(data[0]) < 4+n_prop:
-    raise ValueError('Too few arguments in data')
+# if len(data[0]) < 4+n_prop:
+#     raise ValueError('Too few arguments in data')
 cmd = 'data = [( int(ind),x,y,float(sim),%s ) for ind,x,y,sim,%s in data]' %( float_str,parse_str )  #ind, source, target, sim, props
 exec(cmd)
 
@@ -94,67 +94,72 @@ n_mols = len_d
 n_succ = 0.0
 
 #load fp_df_fixed
-fp_df = pd.read_csv('./fp_df_fixed.csv')
-ignore_cols = [col for col in fp_df.keys() if col == 'ID' or 'Unnamed' in col]
-fp_df = fp_df.drop(ignore_cols, axis=1)
+try:
+    fp_df = pd.read_csv('./fp_df_fixed.csv')
+    ignore_cols = [col for col in fp_df.keys() if col == 'ID' or 'Unnamed' in col]
+    fp_df = fp_df.drop(ignore_cols, axis=1)
 
-def build_dict(data):
-    '''
-    Build a dictionary for all successful pairs
-    '''
-    d = {}
-    for i in data:
-        x_ind = 1
-        x = i[x_ind]
-        l = list(i)
-        small_l = [val for ind,val in enumerate(l) if ind != x_ind] #remove x from list
-        val = tuple(small_l)
-        if x in d:
-            d[x].append(val)
-        else:
-            d[x] = [val]
-    return d
-
-data_d = build_dict(data)
-new_targets = []
-pairs = []
-caught = []
-for x, val in zip(data_d.keys(), data_d.values()):
-    #print "Values: %s\n" %val
-    conditions = ' and '.join(['prop%s%s'%( i,args.prop_targets[i] ) for i in range(n_prop)])
-    cmd2 = 'good = [(ind,sim,%s,y) for ind,y,sim,%s in val if sim>=sim_delta and %s]'%( parse_str,parse_str, conditions)
-    exec(cmd2)
-    #print "Good: %s\n" %good
-    for tup in good:
-        target = tup[-1]
-        ind = tup[0]
-        #print "Target %s\n" %target
-        if target not in mols:
-            #print "target not in mols\n"
-            fp = fp_df.iloc[ind, :].tolist()
-            is_same = []
-            for other in new_targets:
-                #print "Other %s\n" %other[0:10]
-                #print "New fp %s\n" %fp[0:10]
-                result = (np.abs(np.subtract(other, fp)) < .001).all()
-                #print "Bool %s\n" %result
-                is_same.append(result)
-
-            #print "Is same: %s" %is_same
-            if not any(is_same):
-                new_targets.append(fp)
-                #print "new_targets %s\n" %[i[0:10] for i in new_targets]
-                pairs.append((x, target))
-                
-                n_succ += 1
-                print '%s %s %s' %(ind, x, target)
+    def build_dict(data):
+        '''
+        Build a dictionary for all successful pairs
+        '''
+        d = {}
+        for i in data:
+            x_ind = 1
+            x = i[x_ind]
+            l = list(i)
+            small_l = [val for ind,val in enumerate(l) if ind != x_ind] #remove x from list
+            val = tuple(small_l)
+            if x in d:
+                d[x].append(val)
             else:
-                #print "Target already in new targets\n"
-                #print "new_targets %s\n" %[i[0:10] for i in new_targets]
-                caught.append(target)
+                d[x] = [val]
+        return d
 
-div_score = diversity(pairs)
+    data_d = build_dict(data)
+    new_targets = []
+    pairs = []
+    caught = []
+    for x, val in zip(data_d.keys(), data_d.values()):
+        #print "Values: %s\n" %val
+        conditions = ' and '.join(['prop%s%s'%( i,args.prop_targets[i] ) for i in range(n_prop)])
+        cmd2 = 'good = [(ind,sim,%s,y) for ind,y,sim,%s in val if sim>=sim_delta and %s]'%( parse_str,parse_str, conditions)
+        exec(cmd2)
+        #print "Good: %s\n" %good
+        for tup in good:
+            target = tup[-1]
+            ind = tup[0]
+            #print "Target %s\n" %target
+            if target not in mols:
+                #print "target not in mols\n"
+                fp = fp_df.iloc[ind, :].tolist()
+                is_same = []
+                for other in new_targets:
+                    #print "Other %s\n" %other[0:10]
+                    #print "New fp %s\n" %fp[0:10]
+                    result = (np.abs(np.subtract(other, fp)) < .001).all()
+                    #print "Bool %s\n" %result
+                    is_same.append(result)
 
-print 'Evaluated on %d samples' % (n_mols)
-print 'success rate', n_succ / (n_mols*num_decode)
-print 'diversity score %s' %div_score
+                #print "Is same: %s" %is_same
+                if not any(is_same):
+                    new_targets.append(fp)
+                    #print "new_targets %s\n" %[i[0:10] for i in new_targets]
+                    pairs.append((x, target))
+
+                    n_succ += 1
+                    print '%s %s %s' %(ind, x, target)
+                else:
+                    #print "Target already in new targets\n"
+                    #print "new_targets %s\n" %[i[0:10] for i in new_targets]
+                    caught.append(target)
+
+    div_score = diversity(pairs)
+
+    print 'Evaluated on %d samples' % (n_mols)
+    print 'success rate', n_succ / (n_mols*num_decode)
+    print 'diversity score %s' %div_score
+except:
+    print 'Evaluated on %d samples' % (n_mols)
+    print 'success rate 0.0'
+    print 'diversity score nan' 

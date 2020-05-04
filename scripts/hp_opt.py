@@ -270,7 +270,7 @@ else:
 #                             os.system("python %s/iclr19-graph2graph/scripts/mp_val_script.py --dir %s --num %s --n_decode %s \
 #                             --data_dir %s --iclr_dir %s --sim_delta %s --predictors %s --prop_targets %s > %sbest_of_round.txt" %(args.iclr_dir, models_dir, str(epochs), n_decode, data_dir, args.iclr_dir, args.sim_delta, args.predictors, args.prop_targets, 
 #                                                              path) )
-                            os.system("python %s/iclr19-graph2graph/scripts/mp_val_script.py --dir %s --num %s --n_decode %s \
+                            os.system("python %s/iclr19-graph2graph/scripts/val_script.py --dir %s --num %s --n_decode %s \
                             --data_dir %s --iclr_dir %s --sim_delta %s --predictors %s --prop_targets %s > %sbest_of_round.txt" %(args.iclr_dir, models_dir, str(epochs), n_decode, data_dir, args.iclr_dir, args.sim_delta, args.predictors, args.prop_targets, 
                                                              path) )
                             n_epoch = 0
