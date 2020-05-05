@@ -22,7 +22,7 @@ parser.add_argument("--dT_grid", type=int,
 
 parser.add_argument("--dG_grid", type=int,
                     help="list of depthT values to try out", nargs='+', default=[8])
-
+parser.add_argument('--train', action='store_true', help='should any models be trained?')
 parser.add_argument("--hs_grid", type=int,
                     help="list of hidden layer node values to try out", nargs='+', default=[300])
 parser.add_argument("--epochs", type=int,
@@ -37,6 +37,7 @@ parser.add_argument("--n_calls", type=int,
 parser.add_argument("--sim_delta", type=float, help='similarity threshold', default=.2)
 parser.add_argument("--predictors", type=str, help="list of relative paths to python files to run for property evaluation", nargs='+', required=True)
 parser.add_argument("--prop_targets", type=str, help="list of property targets", nargs='+', required=True)
+parser.add_argument('--decode', action='store_true', help='should polymers be decoded?')
 
 
 args = parser.parse_args()
@@ -213,37 +214,38 @@ if args.bayesian:
 #     print "Optimized HPs are %s" %r.x
 
 else:
-#     for lr in params['lr']:
-#         for batch_size in params['batch_size']:
-#             for depthT in params['depthT']:
-#                 for depthG in params['depthG']:
-#                     for hidden_size in params['hidden_size']:
-#                         round_name='lr_%s_bs_%s_depthT_%s_depthG_%s_hs_%s' %(lr, batch_size, depthT, depthG, hidden_size)
-#                         path = cwd + round_name + '/'
-#                         results_dir = path+'results/'
-#                         if (lr, batch_size, depthT, depthG, hidden_size) not in skip:
-#                             round_start = time.time()
-#                             print '\n'
-#                             print 'Starting %s' %round_name
-#                             print'\n'
-#                             models_dir = path+'newmodels'
+    if args.train:
+        for lr in params['lr']:
+            for batch_size in params['batch_size']:
+                for depthT in params['depthT']:
+                    for depthG in params['depthG']:
+                        for hidden_size in params['hidden_size']:
+                            round_name='lr_%s_bs_%s_depthT_%s_depthG_%s_hs_%s' %(lr, batch_size, depthT, depthG, hidden_size)
+                            path = cwd + round_name + '/'
+                            results_dir = path+'results/'
+                            if (lr, batch_size, depthT, depthG, hidden_size) not in skip:
+                                round_start = time.time()
+                                print '\n'
+                                print 'Starting %s' %round_name
+                                print'\n'
+                                models_dir = path+'newmodels'
 
-#                             if not os.path.isdir(path):
-#                                 os.makedirs(path)
-#                             if not os.path.isdir(models_dir):
-#                                 os.makedirs(models_dir)
-#                             if not os.path.isdir(results_dir):
-#                                 os.makedirs(results_dir)
-#                             os.chdir(results_dir)
-#                             train_model(hidden_size, batch_size, depthT, depthG, lr, models_dir)     
-                   
+                                if not os.path.isdir(path):
+                                    os.makedirs(path)
+                                if not os.path.isdir(models_dir):
+                                    os.makedirs(models_dir)
+                                if not os.path.isdir(results_dir):
+                                    os.makedirs(results_dir)
+                                os.chdir(results_dir)
+                                train_model(hidden_size, batch_size, depthT, depthG, lr, models_dir)     
 
-#                             round_end = time.time()
 
-#                             print '\n'
-#                             print "Finished training %s" %round_name
-#                             print 'Time to complete round: %s' %(round_end - round_start)
-#                             print 'Total elapsed time: %s' %(round_end - start)
+                                round_end = time.time()
+
+                                print '\n'
+                                print "Finished training %s" %round_name
+                                print 'Time to complete round: %s' %(round_end - round_start)
+                                print 'Total elapsed time: %s' %(round_end - start)
                               
     for lr in params['lr']:
         for batch_size in params['batch_size']:
@@ -267,11 +269,8 @@ else:
                             if not os.path.isdir(results_dir):
                                 os.makedirs(results_dir)
                             os.chdir(results_dir)
-#                             os.system("python %s/iclr19-graph2graph/scripts/mp_val_script.py --dir %s --num %s --n_decode %s \
-#                             --data_dir %s --iclr_dir %s --sim_delta %s --predictors %s --prop_targets %s > %sbest_of_round.txt" %(args.iclr_dir, models_dir, str(epochs), n_decode, data_dir, args.iclr_dir, args.sim_delta, args.predictors, args.prop_targets, 
-#                                                              path) )
-                            os.system("python %s/iclr19-graph2graph/scripts/val_script.py --dir %s --num %s --n_decode %s \
-                            --data_dir %s --iclr_dir %s --sim_delta %s --predictors %s --prop_targets %s > %sbest_of_round.txt" %(args.iclr_dir, models_dir, str(epochs), n_decode, data_dir, args.iclr_dir, args.sim_delta, args.predictors, args.prop_targets, 
+                            os.system("python %s/iclr19-graph2graph/scripts/val_script.py --decode %s --dir %s --num %s --n_decode %s \
+                            --data_dir %s --iclr_dir %s --sim_delta %s --predictors %s --prop_targets %s > %sbest_of_round.txt" %(args.iclr_dir, args.decode, models_dir, str(epochs), n_decode, data_dir, args.iclr_dir, args.sim_delta, args.predictors, args.prop_targets, 
                                                              path) )
                             n_epoch = 0
                             best_acc = 0.0

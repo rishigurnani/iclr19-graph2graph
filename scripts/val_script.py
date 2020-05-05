@@ -17,6 +17,7 @@ parser.add_argument('--start_epoch', type=int, default=0, help='epoch to start d
 parser.add_argument('--sim_delta', type=float, default=0.2, help='similarity threshold')
 parser.add_argument("--predictors", type=str, help="list of python files to run for property evaluation", nargs='+') 
 parser.add_argument("--prop_targets", type=str, help="list of property targets", nargs='+', required=True)
+parser.add_argument('--decode', type=str, help='should polymers be decoded?')
 #parser.add_argument("--prop_targets", type=list, help="list of property targets")
 
 
@@ -29,6 +30,7 @@ ICLR_DIR = args.iclr_dir
 start_epoch = args.start_epoch
 SIM_DELTA = args.sim_delta
 args.prop_targets = ru.pass_argparse_list(args.prop_targets)
+args.decode = ru.str2bool(args.decode)
 # args = sys.argv
 
 # DIR=args[1] #model directory
@@ -91,13 +93,14 @@ for i in range(NUM):
     print(f)
     if os.path.isfile(f):
         #decode polymers
-        os.system('python %s/iclr19-graph2graph/diff_vae/decode.py --num_decode %s --test %stest.txt --vocab %svocab.txt --model %s --use_molatt > decoded_polymers.%s' %(ICLR_DIR, N_DECODE, DATA_DIR, DATA_DIR, f, str(i)))
+        if args.decode:
+            os.system('python %s/iclr19-graph2graph/diff_vae/decode.py --num_decode %s --test %stest.txt --vocab %svocab.txt --model %s --use_molatt > decoded_polymers.%s' %(ICLR_DIR, N_DECODE, DATA_DIR, DATA_DIR, f, str(i)))
+        #polymerize molecules
+        os.system( 'python %s/iclr19-graph2graph/scripts/polymerize.py < decoded_polymers.%s > polymers.%s' %(ICLR_DIR,i,i) )
         #score decoded polymers
-        print 'val predictors %s' %args.predictors
-        os.system('python %s/iclr19-graph2graph/scripts/score.py --predictors %s < decoded_polymers.%s > results.%s' %(ICLR_DIR, args.predictors, str(i), str(i)))
-        #analyze scored polymers
-#         os.system('python %s/iclr19-graph2graph/scripts/analyze.py --num_decode %s --sim_delta %s --prop_targets %s --total_n %s --mols_path %smols.txt < results.%s > analyze.%s' %(ICLR_DIR, N_DECODE, SIM_DELTA, args.prop_targets, 
-#                                                                          total_n, DATA_DIR, str(i), str(i)) )        
+        os.system('rm decoded_polymers.%s' %i)
+        os.system('python %s/iclr19-graph2graph/scripts/score.py --predictors %s < polymers.%s > results.%s' %(ICLR_DIR, args.predictors, str(i), str(i)))
+        #analyze scored polymers       
         os.system('python %s/iclr19-graph2graph/scripts/analyze.py --num_decode %s --sim_delta %s --prop_targets %s --total_n %s --mols_path %smols.txt < results.%s > analyze.%s' %(ICLR_DIR, N_DECODE, SIM_DELTA, args.prop_targets, 
                                                                          total_n, DATA_DIR, str(i), str(i)) )  
         with open('analyze.%s' %(str(i)) ) as f:
