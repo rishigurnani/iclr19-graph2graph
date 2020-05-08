@@ -1,4 +1,5 @@
 #mp = MULTI_PROPERTY
+from __future__ import division
 import pandas as pd
 import numpy as np
 from itertools import product
@@ -22,6 +23,7 @@ import rdkit
 from rdkit import Chem, DataStructs
 from rdkit.Chem import AllChem
 
+
 # Tanimoto similarity function
 def similarity(a, b):
     if a is None or b is None:
@@ -40,13 +42,16 @@ parser.add_argument("--cutoff", type=float,
 parser.add_argument("--load_sim", action='store_true', help="should similarities be loaded?")
 parser.add_argument("--sim_path", type=str, help="filename where the similarity dict should be saved to or loaded from?")
 parser.add_argument("--n_core", type=int, default=1, help="number of cores")
-parser.add_argument("--data_path", type=str, help="path to raw data")
+parser.add_argument("--data_path", type=str, help="path to raw data with target property values for each smiles")
 parser.add_argument("--prop_cols", type=str,
                     help="list of property columns", nargs='+')
 parser.add_argument("--source_thresh", type=float,
                     help="list of source thresholds", nargs='+')
 parser.add_argument("--target_thresh", type=float,
                     help="list of target thresholds", nargs='+')
+parser.add_argument("--strict", action='store_true', help="Should training pairs follow source_thresh strictly?")
+parser.add_argument("--fuzzy_target", action='store_true', help="Should the target values be fuzzed?")
+
 args = parser.parse_args()
 
 n_prop = len(args.prop_cols)
@@ -67,6 +72,7 @@ if 'id' not in fp_all.keys():
     n_rows = len(fp_all)
     ids = ['rd_%s' %i for i in range(n_rows)]
     fp_all['id'] = ids
+
 source_operations = []
 target_operations = []
 for i in range(n_prop):
@@ -77,18 +83,29 @@ for i in range(n_prop):
         source_operations.append('>')
         target_operations.append('<')
         
-# source = fp_all.loc[fp_all['dft_bandgap'] < 4, ['id', 'smiles', 'dft_bandgap']]
-# target = fp_all.loc[fp_all['dft_bandgap'] > 6, ['id', 'smiles', 'dft_bandgap']]
+def makeSourceTarget():
+    include_cols = ['id', 'smiles'] + args.prop_cols
+    if args.strict:
+        source_cmd = ' & '.join(["(fp_all['%s'] %s %s)" %(args.prop_cols[i], source_operations[i], 
+                                                          args.source_thresh[i]) for i in range(n_prop)])
+    else:
+        source_cmd = ' | '.join(["(fp_all['%s'] %s %s)" %(args.prop_cols[i], source_operations[i], 
+                                                          args.source_thresh[i]) for i in range(n_prop)])   
+    target_cmd = ' & '.join(["(fp_all['%s'] %s %s)" %(args.prop_cols[i], target_operations[i], 
+                                                      args.target_thresh[i]) for i in range(n_prop)])
+    exec( 'source = fp_all.loc[%s, %s]' %(source_cmd, include_cols) ) #make source
+    exec( 'target = fp_all.loc[%s, %s]' %(target_cmd, include_cols) ) #make target
+    return source, target
 
-include_cols = ['id', 'smiles'] + args.prop_cols
-source_cmd = ' & '.join(["(fp_all['%s'] %s %s)" %(args.prop_cols[i], source_operations[i], 
-                                                  args.source_thresh[i]) for i in range(n_prop)])
-target_cmd = ' & '.join(["(fp_all['%s'] %s %s)" %(args.prop_cols[i], target_operations[i], 
-                                                  args.target_thresh[i]) for i in range(n_prop)])
-exec( 'source = fp_all.loc[%s, %s]' %(source_cmd, include_cols) ) #make source
-exec( 'target = fp_all.loc[%s, %s]' %(target_cmd, include_cols) ) #make target
-# num_source = len(source)  # 246
-# num_target = len(target)  # 1027
+source, target = makeSourceTarget()
+if args.fuzzy_target and len(target)/len(fp_all)<.0077:
+    for ind,i in enumerate(target_operations):
+            if abs(args.target_thresh[ind] - args.source_thresh[ind]) / args.target_thresh[ind] > .05:
+                if i=='>':
+                    args.target_thresh[ind] = args.target_thresh[ind]*.95
+                elif i=='<':
+                    args.target_thresh[ind] = args.target_thresh[ind]*1.05    
+    source, target = makeSourceTarget()
 
 def get_vec(p_id):
     '''
