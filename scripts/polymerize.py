@@ -13,6 +13,7 @@ for line in sys.stdin:
         x,y = line.split()
         if y != None:
             poly_ys = ru.polymerize(y)
-            for p in poly_ys:
-                print x, p
+            if poly_ys != None:
+                for p in poly_ys:
+                    print x, p
         

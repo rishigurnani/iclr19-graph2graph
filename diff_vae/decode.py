@@ -14,6 +14,8 @@ import cPickle as pickle
 from fast_jtnn import *
 import rdkit
 
+from joblib import Parallel, delayed
+
 lg = rdkit.RDLogger.logger() 
 lg.setLevel(rdkit.RDLogger.CRITICAL)
 
@@ -31,6 +33,7 @@ parser.add_argument('--use_molatt', action='store_true')
 
 parser.add_argument('--num_decode', type=int, default=20)
 parser.add_argument('--seed', type=int, default=1)
+parser.add_argument('--n_core', type=int, default=1)
 
 args = parser.parse_args()
   
@@ -60,7 +63,8 @@ dataset = MolTreeDataset(batches, vocab, assm=False)
 loader = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=0, collate_fn=lambda x:x[0])
 
 torch.manual_seed(args.seed)
-for batch in loader:
+
+def helper(batch):
     mol_batch = batch[0]
     x_tree_vecs, _, x_mol_vecs = model.encode(batch[1], batch[2])
     assert x_tree_vecs.size(0) == x_mol_vecs.size(0)
@@ -69,4 +73,7 @@ for batch in loader:
         z_tree_vecs, z_mol_vecs = model.fuse_noise(x_tree_vecs, x_mol_vecs)
         smiles = mol_batch[0].smiles
         new_smiles = model.decode(z_tree_vecs[0].unsqueeze(0), z_mol_vecs[0].unsqueeze(0))
-        print smiles, new_smiles
+        print smiles, new_smiles 
+
+Parallel(n_jobs=args.n_core)(delayed(helper)(batch) for batch in loader)
+        #for batch in loader:

@@ -98,7 +98,6 @@ for i in range(NUM):
         #polymerize molecules
         os.system( 'python %s/iclr19-graph2graph/scripts/polymerize.py < decoded_polymers.%s > polymers.%s' %(ICLR_DIR,i,i) )
         #score decoded polymers
-        os.system('rm decoded_polymers.%s' %i)
         os.system('python %s/iclr19-graph2graph/scripts/score.py --predictors %s < polymers.%s > results.%s' %(ICLR_DIR, args.predictors, str(i), str(i)))
         #analyze scored polymers       
         os.system('python %s/iclr19-graph2graph/scripts/analyze.py --num_decode %s --sim_delta %s --prop_targets %s --total_n %s --mols_path %smols.txt < results.%s > analyze.%s' %(ICLR_DIR, N_DECODE, SIM_DELTA, args.prop_targets, 

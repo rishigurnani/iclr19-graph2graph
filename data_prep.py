@@ -182,8 +182,20 @@ def split(cut_off):
     #source_all = fix_smiles(sim_df['source_smile'].unique().tolist())
 
     test = [i for i in source_all if i not in source_in_train]
+    
+    #flag and get rid of invalid test SMILES
+    processed_test = []
+    failed = []
+    for a in test:
+        if Chem.MolFromSmiles(a) != None:
+            processed_test.append(a)
+        else:
+            failed.append(a)
+    for a in failed:
+        print '%s is a proposed test SMILES which is not a valid molecule' %a
+    ####################################################################
     outfile = open('trial_test_' + str(len(test)) + '.txt', "w")
-    print >> outfile, "\n".join(str(i) for i in test)
+    print >> outfile, "\n".join(str(i) for i in processed_test)
     #print("\n".join(str(i) for i in test), file=outfile)
     outfile.close()
 
