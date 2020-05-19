@@ -9,19 +9,21 @@ import sys
 sys.path.append('/home/rgur/py_scripts/')
 sys.path.append('/home/rishi/py_scripts/')
 import rishi_utils as ru
+from joblib import Parallel, delayed
 
 parser = argparse.ArgumentParser(description='specify test data size or percent')
+print ru.add_timestamp('')
+sys.stdout.flush()
 
 #some functions which satisfy the following properties:
 # 1) read from fp_df.csv
 # 2) return list of property predictions
 # 3) have function named 'main' which returns necessary data
 parser.add_argument("--predictors", type=str,
-                    help="list of python files to run for property evaluation", nargs='+') 
+                    help="list of python files to run for property evaluation", nargs='+')
+parser.add_argument("--n_core", type=int,
+                    help="number of cores to use")
 args = parser.parse_args()
-
-print args
-sys.stdout.flush()
 
 n_prop = len(args.predictors)
 path_to_append = []
@@ -31,16 +33,14 @@ for path in args.predictors:
     sys.path.append('/'.join(spl[0:-1]))
     modules.append(spl[-1].split('.py')[0]) #exclude .py from module name
 
-# print modules
-# sys.stdout.flush()
+#print modules    
     
 functions = []
 for i, module in enumerate(modules):
     functions.append( 'main_%s' %i )
     exec( 'from %s import main as main_%s' %(module, i) )
 
-# print functions
-# sys.stdout.flush()
+#print functions
     
 def save_smiles_df(y_map):
     '''
@@ -153,7 +153,7 @@ def tup_to_str(tup):
 
     return ' '.join(l)
 
-for ind, prop in enumerate(zipped_props):
+def helper(ind,prop):
     smilesdf_ID = ind2ID_map[ind] #ID: index of smiles_df aka index before dropping cols during fingerprint
     for og_row_num in occurence_map[smilesdf_ID]: #og_row_num: row number after deleting identical translations from same source
         x = xs[og_row_num]
@@ -163,4 +163,19 @@ for ind, prop in enumerate(zipped_props):
         try:
             print ind, x, y, sim2D, prop_string
         except:
-            print ind, x, y, sim2D, 0.0
+            print ind, x, y, sim2D, 0.0    
+
+Parallel(n_jobs=args.n_core,prefer="threads")(delayed(helper)(ind, prop) for ind, prop in enumerate(zipped_props))
+print ru.add_timestamp('')
+#Parallel(n_jobs=2)(delayed(sqrt)(i ** 2) for i in range(10))
+# for ind, prop in enumerate(zipped_props):
+#     smilesdf_ID = ind2ID_map[ind] #ID: index of smiles_df aka index before dropping cols during fingerprint
+#     for og_row_num in occurence_map[smilesdf_ID]: #og_row_num: row number after deleting identical translations from same source
+#         x = xs[og_row_num]
+#         y = ys[og_row_num]
+#         sim2D = similarity(x, ru.depolymerize(y))
+#         prop_string = tup_to_str(prop)
+#         try:
+#             print ind, x, y, sim2D, prop_string
+#         except:
+#             print ind, x, y, sim2D, 0.0

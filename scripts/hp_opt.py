@@ -38,9 +38,13 @@ parser.add_argument("--sim_delta", type=float, help='similarity threshold', defa
 parser.add_argument("--predictors", type=str, help="list of relative paths to python files to run for property evaluation", nargs='+', required=True)
 parser.add_argument("--prop_targets", type=str, help="list of property targets", nargs='+', required=True)
 parser.add_argument('--decode', action='store_true', help='should polymers be decoded?')
-
+parser.add_argument("--n_core", type=int,
+                    help="number of threads/processes to use", default=4)
 
 args = parser.parse_args()
+
+print args
+sys.stdout.flush()
 
 skip = [] #add hyperparameter combos which should be skipped
 
@@ -269,8 +273,8 @@ else:
                             if not os.path.isdir(results_dir):
                                 os.makedirs(results_dir)
                             os.chdir(results_dir)
-                            os.system("python %s/iclr19-graph2graph/scripts/val_script.py --decode %s --dir %s --num %s --n_decode %s \
-                            --data_dir %s --iclr_dir %s --sim_delta %s --predictors %s --prop_targets %s > %sbest_of_round.txt" %(args.iclr_dir, args.decode, models_dir, str(epochs), n_decode, data_dir, args.iclr_dir, args.sim_delta, args.predictors, args.prop_targets, 
+                            os.system("python %s/iclr19-graph2graph/scripts/val_script.py --decode %s --dir %s --num %s --n_decode %s --n_core %s \
+                            --data_dir %s --iclr_dir %s --sim_delta %s --predictors %s --prop_targets %s > %sbest_of_round.txt" %(args.iclr_dir, args.decode, models_dir, str(epochs), n_decode, args.n_core, data_dir, args.iclr_dir, args.sim_delta, args.predictors, args.prop_targets, 
                                                              path) )
                             n_epoch = 0
                             best_acc = 0.0

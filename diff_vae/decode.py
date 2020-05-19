@@ -14,6 +14,9 @@ import cPickle as pickle
 from fast_jtnn import *
 import rdkit
 
+import sys
+sys.setrecursionlimit(5000)
+
 from joblib import Parallel, delayed
 
 lg = rdkit.RDLogger.logger() 
@@ -73,7 +76,8 @@ def helper(batch):
         z_tree_vecs, z_mol_vecs = model.fuse_noise(x_tree_vecs, x_mol_vecs)
         smiles = mol_batch[0].smiles
         new_smiles = model.decode(z_tree_vecs[0].unsqueeze(0), z_mol_vecs[0].unsqueeze(0))
-        print smiles, new_smiles 
+        if new_smiles != None:
+            print smiles, new_smiles 
 
 Parallel(n_jobs=args.n_core)(delayed(helper)(batch) for batch in loader)
         #for batch in loader:

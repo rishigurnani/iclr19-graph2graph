@@ -3,6 +3,8 @@ import sys
 sys.path.append('/home/rgur/py_scripts/')
 sys.path.append('/home/rishi/py_scripts/')
 import rishi_utils as ru
+
+N_RAND=20
 #perform tasks
 ys = []
 xs = []
@@ -12,7 +14,7 @@ for line in sys.stdin:
         lines.append(line)
         x,y = line.split()
         if y != None:
-            poly_ys = ru.polymerize(y)
+            poly_ys = ru.polymerize(y,N_RAND)
             if poly_ys != None:
                 for p in poly_ys:
                     print x, p

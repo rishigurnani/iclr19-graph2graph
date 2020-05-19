@@ -18,6 +18,8 @@ parser.add_argument('--sim_delta', type=float, default=0.2, help='similarity thr
 parser.add_argument("--predictors", type=str, help="list of python files to run for property evaluation", nargs='+') 
 parser.add_argument("--prop_targets", type=str, help="list of property targets", nargs='+', required=True)
 parser.add_argument('--decode', type=str, help='should polymers be decoded?')
+parser.add_argument("--n_core", type=int,
+                    help="number of threads/processes to use", default=1)
 #parser.add_argument("--prop_targets", type=list, help="list of property targets")
 
 
@@ -94,7 +96,7 @@ for i in range(NUM):
     if os.path.isfile(f):
         #decode polymers
         if args.decode:
-            os.system('python %s/iclr19-graph2graph/diff_vae/decode.py --num_decode %s --test %stest.txt --vocab %svocab.txt --model %s --use_molatt > decoded_polymers.%s' %(ICLR_DIR, N_DECODE, DATA_DIR, DATA_DIR, f, str(i)))
+            os.system('python %s/iclr19-graph2graph/diff_vae/decode.py --num_decode %s --test %stest.txt --vocab %svocab.txt --model %s --use_molatt --n_core %s > decoded_polymers.%s' %(ICLR_DIR, N_DECODE, DATA_DIR, DATA_DIR, f, args.n_core, str(i)))
         #polymerize molecules
         os.system( 'python %s/iclr19-graph2graph/scripts/polymerize.py < decoded_polymers.%s > polymers.%s' %(ICLR_DIR,i,i) )
         #score decoded polymers

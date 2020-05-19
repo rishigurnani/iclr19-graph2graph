@@ -49,14 +49,15 @@ parser.add_argument("--source_thresh", type=float,
                     help="list of source thresholds", nargs='+')
 parser.add_argument("--target_thresh", type=float,
                     help="list of target thresholds", nargs='+')
-parser.add_argument("--strict", action='store_true', help="Should training pairs follow source_thresh strictly?")
+#parser.add_argument("--strict", action='store_true', help="Should training pairs follow source_thresh strictly?")
+parser.add_argument("--flip_props", type=int, default=[], help="Which property indices should use target threshold for source class?", nargs='+')
 parser.add_argument("--fuzzy_target", action='store_true', help="Should the target values be fuzzed?")
 
 args = parser.parse_args()
 
+initial_source_thresh = list(args.source_thresh)
 n_prop = len(args.prop_cols)
 print "Prop cols %s" %args.prop_cols
-print "source_thresh %s" %args.source_thresh
 print "target_thresh %s" %args.target_thresh
 
 if len(args.source_thresh) != n_prop:
@@ -83,14 +84,24 @@ for i in range(n_prop):
         source_operations.append('>')
         target_operations.append('<')
         
+
+def flip_inequality(s):
+    if s == '>':
+        return '<'
+    elif s == '<':
+        return '>'
+        
 def makeSourceTarget():
     include_cols = ['id', 'smiles'] + args.prop_cols
-    if args.strict:
-        source_cmd = ' & '.join(["(fp_all['%s'] %s %s)" %(args.prop_cols[i], source_operations[i], 
-                                                          args.source_thresh[i]) for i in range(n_prop)])
-    else:
-        source_cmd = ' | '.join(["(fp_all['%s'] %s %s)" %(args.prop_cols[i], source_operations[i], 
-                                                          args.source_thresh[i]) for i in range(n_prop)])   
+    for i in args.flip_props:
+        source_operations[i] = flip_inequality(source_operations[i])
+        args.source_thresh[i] = args.target_thresh[i]
+
+    source_cmd = ' & '.join(["(fp_all['%s'] %s %s)" %(args.prop_cols[i], source_operations[i], 
+                                                      args.source_thresh[i]) for i in range(n_prop)])        
+#    else:
+#         source_cmd = ' | '.join(["(fp_all['%s'] %s %s)" %(args.prop_cols[i], source_operations[i], 
+#                                                           args.source_thresh[i]) for i in range(n_prop)])   
     target_cmd = ' & '.join(["(fp_all['%s'] %s %s)" %(args.prop_cols[i], target_operations[i], 
                                                       args.target_thresh[i]) for i in range(n_prop)])
     exec( 'source = fp_all.loc[%s, %s]' %(source_cmd, include_cols) ) #make source
@@ -98,14 +109,19 @@ def makeSourceTarget():
     return source, target
 
 source, target = makeSourceTarget()
+print'Source Threshold After Flipping %s' %args.source_thresh
 if args.fuzzy_target and len(target)/len(fp_all)<.0077:
+    args.source_thresh = initial_source_thresh
     for ind,i in enumerate(target_operations):
-            if abs(args.target_thresh[ind] - args.source_thresh[ind]) / args.target_thresh[ind] > .05:
+            if (abs(args.target_thresh[ind] - args.source_thresh[ind]) / args.target_thresh[ind]) >= .05:
                 if i=='>':
                     args.target_thresh[ind] = args.target_thresh[ind]*.95
                 elif i=='<':
-                    args.target_thresh[ind] = args.target_thresh[ind]*1.05    
+                    args.target_thresh[ind] = args.target_thresh[ind]*1.05
+    print 'Decreased Target Thresholds to %s Using Fuzz' %args.target_thresh
     source, target = makeSourceTarget()
+    print 'Source Threshold After Fuzz & Flipping %s' %args.source_thresh
+    print target
 
 def get_vec(p_id):
     '''
